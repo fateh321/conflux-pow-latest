@@ -26,6 +26,7 @@ use crate::{
     },
     ConsensusGraph, NodeType,
 };
+use cfxkey::Secret;
 use cfx_internal_common::ChainIdParamsDeprecated;
 use cfx_parameters::{block::MAX_BLOCK_SIZE_IN_BYTES, sync::*};
 use cfx_types::H256;
@@ -1169,7 +1170,14 @@ impl SynchronizationProtocolHandler {
 
     pub fn on_mined_block(&self, mut block: Block) {
         let hash = block.block_header.hash();
-        info!("Mined block {:?} header={:?}", hash, block.block_header);
+        let txn_count = block.transactions.len();
+        let time_stamp = block.block_header.timestamp();
+        Secret::incr_txn_count(txn_count as u64);
+        // Secret::incr_txn_count(1u64);
+        let total_txn = Secret::get_txn_count();
+        // info!("Mined block {:?} header={:?}", hash, block.block_header);
+        info!("Mined block {:?} txn={:?} totalTxn={:?} timestamp={:?}", hash, txn_count, total_txn, time_stamp);
+        // info!("Mined block {:?} header={:?}", hash, block.block_header);
         let parent_hash = *block.block_header.parent_hash();
 
         assert!(self.graph.contains_block_header(&parent_hash));

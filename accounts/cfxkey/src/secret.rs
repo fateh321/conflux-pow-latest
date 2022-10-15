@@ -21,7 +21,7 @@ use std::{fmt, ops::Deref, str::FromStr};
 use zeroize::Zeroize;
 use Error;
 use SECP256K1;
-
+static mut TXN_COUNT: u64 = 0u64;
 #[derive(Clone, PartialEq, Eq, DeriveMallocSizeOf)]
 pub struct Secret {
     inner: H256,
@@ -54,6 +54,15 @@ impl fmt::Display for Secret {
 }
 
 impl Secret {
+    pub fn incr_txn_count(input:u64){
+        unsafe{TXN_COUNT += input;}
+    }
+    pub fn get_txn_count()->u64{
+        unsafe{
+            let o = TXN_COUNT;
+            o
+        }
+    }
     /// Creates a `Secret` from the given slice, returning `None` if the slice
     /// length != 32.
     pub fn from_slice(key: &[u8]) -> Option<Self> {
